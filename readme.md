@@ -6,6 +6,8 @@ Ce projet est un template pour l'implémentation d'un service au sein d'une arch
 
 L'annuaire microservice met à disposition les endpoints suivants :
 
+**Attention : les endpoints necessitant une authentification de type Token doivent être requetés avec un header nommé "x-auth-token" contenant le jeton qui aura été délivré lors de l'enregistrement.**
+
 ### Enregistrement d'un microservice
 
 Ce endpoint enregistrera votre microservice au sein de l'annuaire à condition que le code soit valide et que le host 
@@ -46,7 +48,6 @@ Response codes :
 | 403 | Authentification invalide |
 | 500 | Erreur inconnue (serveur) |
 | 502 | Le service ne répond pas à l'adresse GET *${host}/ping* |
-
 
 ### Lister les microservices enregistrés
 
@@ -95,27 +96,26 @@ Type : JSON object
 
 Output :
 
-Type : JSON array
+Type : JSON object
 
 |Name|Description|Type| 
 |---|---|---|
-| host | Host du microservice |  String/null |
-| code | Code | Code du microservice |
+| valid | Validité du token | Boolean |
 
 Response codes :
 
 |Status|Description|
 |---|---|
 | 200 | OK |  
+| 400 | Un des paramètres obligatoires est manquant |
 | 403 | Authentification invalide |
 | 500 | Erreur inconnue (serveur) |
-
 
 ### Déverrouiller un lien avec un microservice
 
 Ce endpoint deverrouille un lien avec un microservice.
 
-- URL : **${host_annuaire}/unlock**
+- URL : **${host_annuaire}/key/unlock**
 - METHOD : **POST**
 - AUTHENTICATION TYPE : **Token** (x-auth-token header)
 
@@ -126,7 +126,7 @@ Type : JSON object
 |Name|Description|Type| 
 |---|---|---|
 | code | Code du microservice emetteur de la clef |  String |
-| key | Clef fourni par le microservice |  String |
+| key | Clef fourni par le microservice chiffrée en SHA256 |  String |
 
 Output :
 
