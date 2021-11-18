@@ -123,8 +123,8 @@ app.post("/newservice", async (req, res) => {
   // Récuération du body
   let body = req.body;
   try {
-    await pingServer(body);
     console.log(`new service ${body.code}`);
+    await pingServer(body);
   } catch (error) {
     console.log(`error with ${body.code}`);
   }
