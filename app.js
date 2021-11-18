@@ -56,24 +56,30 @@ app.get("/getkey", async (req, res) => {
   // Récuperer les headers
   let headers = req.headers;
   try {
-    const response = await axios.post(
-      `${REGISTRY}/token/validate`,
-      {
-        token: headers["x-auth-token"],
-      },
-      {
-        headers: {
-          "X-Auth-Token": auth.token,
+    try {
+      const response = await axios.post(
+        `${REGISTRY}/token/validate`,
+        {
+          token: headers["x-auth-token"],
         },
+        {
+          headers: {
+            "X-Auth-Token": auth.token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        const token = encrypt(auth.secret_key, auth.public_key);
+        res.json(token);
+      } else {
+        res.sendStatus(403);
       }
-    );
-    if (response.status === 200) {
-      const token = encrypt(auth.secret_key, auth.public_key);
-      res.json(token);
+    } catch {
+      res.sendStatus(502);
     }
   } catch (error) {
     console.log(error);
-    res.sendStatus(400);
+    res.sendStatus(500);
   }
 });
 
