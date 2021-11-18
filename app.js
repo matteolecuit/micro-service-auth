@@ -36,9 +36,7 @@ const pingServer = async (server) => {
       },
     });
     console.log(`contacted ${server.code}`);
-  } catch (error) {
-    return;
-  }
+  } catch (error) {}
   try {
     console.log(responseGetKey.data.encrypted_public_key);
     const responseUnlock = await axios.post(
@@ -56,6 +54,7 @@ const pingServer = async (server) => {
     console.log(`unlocked ${server.code}`);
   } catch (error) {
     //console.log(error);
+    return;
   }
 };
 
