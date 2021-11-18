@@ -15,12 +15,14 @@ const start = async () => {
   let response;
   try {
     response = await getKey();
+    console.log(response.data);
     token = response.data;
+    response = await getRegistry(token.token);
+    console.log(response.data);
   } catch (e) {
     console.error(e.response ? e.response.data : e);
     return;
   }
-  console.log(response.data);
 };
 
 const getKey = async () => {
@@ -29,6 +31,20 @@ const getKey = async () => {
     { host: "http://10.8.0.13:3000", code: "matteo.lecuit" },
     { auth: { username: "ynovset", password: "tHuds4752_525@" } }
   );
+  return response;
+};
+
+const getRegistry = async (token) => {
+  let response;
+  try {
+    response = await axios.get(`${REGISTRY}/registry`, {
+      headers: {
+        "X-Auth-Token": token,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
   return response;
 };
 // Création d'un endpoint en GET
@@ -44,7 +60,7 @@ app.get("/getkey", async (req, res) => {
     { data_key: "" },
     { headers: { "my-custom-header": "xxx" } }
   );
-  res.json();
+  res.json(200);
 });
 
 // Création d'un endpoint en POST
