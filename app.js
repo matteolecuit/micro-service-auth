@@ -17,12 +17,25 @@ const start = async () => {
     response = await getKey();
     console.log(response.data);
     auth = response.data;
-    response = await getRegistry();
-    console.log(response.data);
+    const servers = await getRegistry();
+    console.log(servers.data);
+    servers.data.forEach(async (server) => {
+      pingServer(server);
+    });
   } catch (e) {
     console.error(e.response ? e.response.data : e);
     return;
   }
+};
+const pingServer = async (server) => {
+  try {
+    const response = await axios.get(`${server.host}/registry`, {
+      headers: {
+        "X-Auth-Token": auth.token,
+      },
+    });
+    console.log(`contacted ${server.code}`);
+  } catch (error) {}
 };
 
 const getKey = async () => {
