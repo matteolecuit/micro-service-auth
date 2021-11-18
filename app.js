@@ -28,14 +28,35 @@ const start = async () => {
   }
 };
 const pingServer = async (server) => {
+  let responseGetKey;
   try {
-    const response = await axios.get(`${server.host}/registry`, {
+    responseGetKey = await axios.get(`${server.host}/getkey`, {
       headers: {
         "X-Auth-Token": auth.token,
       },
     });
     console.log(`contacted ${server.code}`);
-  } catch (error) {}
+  } catch (error) {
+    return;
+  }
+  try {
+    console.log(responseGetKey.data.encrypted_public_key);
+    const responseUnlock = await axios.post(
+      `${REGISTRY}/key/unlock`,
+      {
+        code: server.code,
+        key: responseGetKey.data.encrypted_public_key,
+      },
+      {
+        headers: {
+          "X-Auth-Token": auth.token,
+        },
+      }
+    );
+    console.log(`unlocked ${server.code}`);
+  } catch (error) {
+    //console.log(error);
+  }
 };
 
 const getKey = async () => {
@@ -83,7 +104,7 @@ app.get("/getkey", async (req, res) => {
       );
       if (response.status === 200) {
         const token = encrypt(auth.secret_key, auth.public_key);
-        res.json(token);
+        res.json({ encrypted_public_key: token });
       } else {
         res.sendStatus(403);
       }
