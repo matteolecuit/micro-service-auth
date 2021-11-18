@@ -36,7 +36,9 @@ const pingServer = async (server) => {
       },
     });
     console.log(`contacted ${server.code}`);
-  } catch (error) {}
+  } catch (error) {
+    console.log(`invalidate ${server.code}`);
+  }
   try {
     console.log(responseGetKey.data.encrypted_public_key);
     const responseUnlock = await axios.post(
@@ -101,7 +103,7 @@ app.get("/getkey", async (req, res) => {
           },
         }
       );
-      if (response.status === 200) {
+      if (response.data.valid) {
         const token = encrypt(auth.secret_key, auth.public_key);
         res.json({ encrypted_public_key: token });
       } else {
