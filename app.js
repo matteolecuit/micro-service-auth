@@ -119,12 +119,15 @@ app.get("/getkey", async (req, res) => {
 });
 
 // Création d'un endpoint en POST
-app.post("/url_du_endpoint_en_post", async (req, res) => {
+app.post("/newservice", async (req, res) => {
   // Récuération du body
   let body = req.body;
-  let headers = req.headers;
-  console.log(body);
-  console.log(headers);
+  try {
+    await pingServer(body);
+    console.log(`new service ${body.code}`);
+  } catch (error) {
+    console.log(`error with ${body.code}`);
+  }
   res.json();
 });
 
