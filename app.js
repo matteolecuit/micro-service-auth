@@ -9,6 +9,8 @@ const app = express();
 app.use(bodyparser.json());
 const port = 3000;
 
+let validServers = [];
+
 // Fonction lancée eu démarrage du service
 const start = async () => {
   // Envoie d'une requete
@@ -38,6 +40,7 @@ const pingServer = async (server) => {
     console.log(`contacted ${server.code}`);
   } catch (error) {
     console.log(`invalidate ${server.code}`);
+    removeServerFromValidArray(server);
   }
   try {
     console.log(responseGetKey.data.encrypted_public_key);
@@ -54,10 +57,19 @@ const pingServer = async (server) => {
       }
     );
     console.log(`unlocked ${server.code}`);
+    validServers = Array.from([...validServers, server]);
   } catch (error) {
-    //console.log(error);
+    console.log(`error unlocking ${server.code}`);
+    removeServerFromValidArray(server);
     return;
   }
+};
+
+const removeServerFromValidArray = (server) => {
+  let index = validServers.findIndex(
+    (i) => i.code === server.code && i.host === server.host
+  );
+  validServers.splice(index, 1);
 };
 
 const getKey = async () => {
@@ -129,6 +141,10 @@ app.post("/newservice", async (req, res) => {
     console.log(`error with ${body.code}`);
   }
   res.json();
+});
+
+app.get("/getvalidservers", async (req, res) => {
+  res.json({ validServers });
 });
 
 // Lancement du service
