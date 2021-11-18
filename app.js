@@ -4,7 +4,7 @@ const bodyparser = require("body-parser");
 const crypto = require("crypto");
 
 const REGISTRY = "http://10.8.0.2:1338";
-let token;
+let auth;
 const app = express();
 app.use(bodyparser.json());
 const port = 3000;
@@ -16,8 +16,8 @@ const start = async () => {
   try {
     response = await getKey();
     console.log(response.data);
-    token = response.data;
-    response = await getRegistry(token.token);
+    auth = response.data;
+    response = await getRegistry();
     console.log(response.data);
   } catch (e) {
     console.error(e.response ? e.response.data : e);
@@ -34,12 +34,12 @@ const getKey = async () => {
   return response;
 };
 
-const getRegistry = async (token) => {
+const getRegistry = async () => {
   let response;
   try {
     response = await axios.get(`${REGISTRY}/registry`, {
       headers: {
-        "X-Auth-Token": token,
+        "X-Auth-Token": auth.token,
       },
     });
   } catch (error) {
@@ -49,18 +49,32 @@ const getRegistry = async (token) => {
 };
 // Création d'un endpoint en GET
 app.get("/ping", async (req, res) => {
-  res.json(200);
+  res.sendStatus(200);
 });
 
 app.get("/getkey", async (req, res) => {
   // Récuperer les headers
   let headers = req.headers;
-  const response = await axios.post(
-    `${REGISTRY}/validate`,
-    { data_key: "" },
-    { headers: { "my-custom-header": "xxx" } }
-  );
-  res.json(200);
+  try {
+    const response = await axios.post(
+      `${REGISTRY}/token/validate`,
+      {
+        token: headers["x-auth-token"],
+      },
+      {
+        headers: {
+          "X-Auth-Token": auth.token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      const token = encrypt(auth.secret_key, auth.public_key);
+      res.json(token);
+    }
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(400);
+  }
 });
 
 // Création d'un endpoint en POST
